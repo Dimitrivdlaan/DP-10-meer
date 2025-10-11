@@ -22,6 +22,9 @@ class MainWindow(QMainWindow):
         self._database = DatabaseConnectie()
         self._database.open_verbinding()
 
+        # nieuw attribuut om de huidige attractie op te slaan
+        self._geselecteerde_attractie = None
+
         # gebruik een QStackedWidget om tussen schermen te wisselen
         self._stack = QStackedWidget()
         self.setCentralWidget(self._stack)
@@ -56,11 +59,16 @@ class MainWindow(QMainWindow):
     def get_scherm1(self):
         """Geeft gecontroleerde toegang tot scherm1 vanuit andere schermen."""
         return self._scherm1
-    
-    def get_scherm1(self):
-        """Geeft gecontroleerde toegang tot scherm1."""
-        return self._scherm1
 
+    # nieuwe functies om attractienaam te beheren
+    def set_geselecteerde_attractie(self, attractie_naam: str):
+        """Slaat de gekozen attractienaam tijdelijk op."""
+        self._geselecteerde_attractie = attractie_naam
+        print(f"Geselecteerde attractie ingesteld op: {attractie_naam}")
+
+    def get_geselecteerde_attractie(self):
+        """Geeft de momenteel gekozen attractie terug."""
+        return self._geselecteerde_attractie
 
     def closeEvent(self, event):
         """Wordt uitgevoerd bij het afsluiten van de applicatie."""

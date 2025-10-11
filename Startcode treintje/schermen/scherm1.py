@@ -1,5 +1,5 @@
-# Opmerkingen in deze code zijn door mij geschreven ter verduidelijking van de werking. 
-# De data komt uit de database en wordt netjes in een tabel weergegeven.
+# Opmerkingen in deze code zijn door mij geschreven ter verduidelijking van de werking.
+# Dit scherm toont de attracties en hun wachttijden, en laat de gebruiker een attractie kiezen om te reserveren.
 
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QTableWidget, QTableWidgetItem
 from PyQt6.QtCore import Qt
@@ -8,10 +8,10 @@ class Scherm1(QWidget):
     def __init__(self, main_window):
         super().__init__()
 
-        # Verwijzing naar het hoofdvenster om later te kunnen navigeren
+        # Verwijzing naar het hoofdvenster zodat we later van scherm kunnen wisselen
         self._main_window = main_window
 
-        # Hoofdlayout voor dit scherm
+        # Layout voor het hele scherm aanmaken
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -20,52 +20,63 @@ class Scherm1(QWidget):
         titel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         titel.setStyleSheet("font-size: 22px; font-weight: bold; margin-bottom: 10px;")
 
-        # Tabel om de wachttijden te tonen
+        # Tabel aanmaken waarin de attracties en wachttijden worden getoond
         self._tabel = QTableWidget()
-        self._tabel.setColumnCount(2)
-        self._tabel.setHorizontalHeaderLabels(["Attractie", "Wachttijd (minuten)"])
+        self._tabel.setColumnCount(3)  # kolommen: knop, attractienaam, wachttijd
+        self._tabel.setHorizontalHeaderLabels(["#", "Attractie", "Wachttijd (minuten)"])
         self._tabel.setStyleSheet("font-size: 16px;")
 
-        # Knoppen onderaan
-        self._btn_reserveren = QPushButton("Maak een reservering")
-        self._btn_reserveren.clicked.connect(self._open_reserveren)
-
+        # Knop om terug te keren naar de homepagina
         self._btn_terug = QPushButton("Terug naar homepagina")
         self._btn_terug.clicked.connect(self._terug_naar_home)
 
-        # Alles toevoegen aan layout
+        # Alle onderdelen toevoegen aan de layout
         layout.addWidget(titel)
         layout.addWidget(self._tabel)
-        layout.addWidget(self._btn_reserveren)
         layout.addWidget(self._btn_terug)
 
-        # Layout koppelen aan scherm
+        # De layout koppelen aan dit scherm
         self.setLayout(layout)
 
-        # Vullen van de tabel met data uit de database
+        # Functie aanroepen om de tabel te vullen met data uit de database
         self._vul_tabel_met_data()
 
     def _vul_tabel_met_data(self):
-        """Haalt data uit de database en vult de tabel."""
+        """Haalt de attracties en wachttijden op uit de database en vult de tabel."""
         try:
-            # Haalt de databaseconnectie op vanuit main_window
-            locaties = self._main_window._database.get_locaties()
+            # Ophalen van data via de databaseconnectie uit het main_window
+            locaties = self._main_window.get_database().get_locaties()
 
-            # Aantal rijen instellen op basis van het aantal resultaten
+            # Aantal rijen in de tabel instellen op basis van het aantal resultaten
             self._tabel.setRowCount(len(locaties))
 
-            # Elke rij vullen met naam en wachttijd
+            # Elke rij vullen met een knop en de bijbehorende data
             for i, (naam, wachttijd) in enumerate(locaties):
-                self._tabel.setItem(i, 0, QTableWidgetItem(str(naam)))
-                self._tabel.setItem(i, 1, QTableWidgetItem(str(wachttijd)))
+                # Maak een knop met de naam van de attractie
+                btn = QPushButton(str(naam))
+                # Als je op de knop drukt, wordt de attractie doorgegeven aan de reserveringsfunctie
+                btn.clicked.connect(lambda _, n=naam: self._reserveer(n))
+                # Voeg de knop toe in de eerste kolom
+                self._tabel.setCellWidget(i, 0, btn)
+
+                # Vul de attractienaam en wachttijd in de andere kolommen
+                self._tabel.setItem(i, 1, QTableWidgetItem(str(naam)))
+                self._tabel.setItem(i, 2, QTableWidgetItem(str(wachttijd)))
 
         except Exception as e:
+            # Als er iets fout gaat bij het ophalen of tonen van data
             print(f"Fout bij laden van wachttijden: {e}")
 
-    def _open_reserveren(self):
-        """Opent het scherm waar gebruiker een reservering kan maken."""
+    def _reserveer(self, attractie_naam):
+        """Wordt uitgevoerd als de gebruiker op een attractie klikt om te reserveren."""
+        print(f"Attractie gekozen: {attractie_naam}")
+
+        # De gekozen attractie opslaan in het main window zodat andere schermen deze kunnen gebruiken
+        self._main_window.set_geselecteerde_attractie(attractie_naam)
+
+        # Naar het volgende scherm gaan waar de gebruiker een tijdslot kan kiezen
         self._main_window.toon_pagina(self._main_window._scherm2)
 
     def _terug_naar_home(self):
-        """Gaat terug naar de homepagina."""
+        """Keert terug naar de homepagina."""
         self._main_window.toon_pagina(self._main_window._homepagina)
