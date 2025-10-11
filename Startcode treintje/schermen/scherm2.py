@@ -32,6 +32,9 @@ class Scherm2(QWidget):
             "16:30 - 17:15"
         ])
 
+        # Dubbelklik op een tijdslot werkt ook als bevestiging
+        self._lijst_tijden.itemDoubleClicked.connect(self._bevestig_reis)
+
         # Knop om tijdslot te bevestigen
         self._btn_bevestig = QPushButton("Bevestig mijn reis!")
         self._btn_bevestig.clicked.connect(self._bevestig_reis)
@@ -44,20 +47,23 @@ class Scherm2(QWidget):
         # Layout koppelen aan het scherm
         self.setLayout(layout)
 
-    def _bevestig_reis(self):
+    def _bevestig_reis(self, item=None):
         """Functie om de gekozen tijd op te halen en naar het bevestigingsscherm te gaan."""
         # Ophalen van geselecteerde tijd
-        geselecteerde_items = self._lijst_tijden.selectedItems()
-
-        # Controle of er iets is gekozen
-        if geselecteerde_items:
-            tijd = geselecteerde_items[0].text()  # haalt de tekst van het geselecteerde item op
-            print(f"Tijdslot bevestigd: {tijd}")
-
-            # In echte app zou dit in de database worden opgeslagen
-            # self._main_window._database.opslaan_tijdslot(tijd)
-
-            # Ga door naar bevestigingsscherm (scherm3)
-            self._main_window.toon_pagina(self._main_window._scherm3)
+        if item:  # als het via dubbelklik is
+            tijd = item.text()
         else:
-            print("Geen tijdslot geselecteerd!")
+            geselecteerde_items = self._lijst_tijden.selectedItems()
+            if not geselecteerde_items:
+                print("Geen tijdslot geselecteerd!")
+                return
+            tijd = geselecteerde_items[0].text()
+
+        print(f"Tijdslot bevestigd: {tijd}")
+
+        # In echte app zou dit in de database worden opgeslagen
+        # self._main_window._database.voeg_reservering_toe('Treintje', tijd)
+
+        # Ga door naar bevestigingsscherm (scherm3)
+        self._main_window.toon_pagina(self._main_window._scherm3)
+

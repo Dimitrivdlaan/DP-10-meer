@@ -41,9 +41,13 @@ class DatabaseConnectie:
                 print(f"{locatie_id}: {naam} (wachttijd: {wachttijd} minuten)")
         except mysql.connector.Error as err:
             print(f"Fout bij ophalen van data: {err}")
+    
+    def get_locaties(self):
+        """Alias voor toon_locaties(), voor compatibiliteit met oude code."""
+        self.toon_locaties()
 
-    def voeg_reservering_toe(self, attractie, tijdslot):
-     """Voegt een reservering toe voor een attractie en tijdslot."""
+def voeg_reservering_toe(self, attractie, tijdslot):
+    """Voegt een reservering toe voor een attractie en tijdslot."""
     try:
         # Insert-query om een nieuwe reservering op te slaan
         query = "INSERT INTO Reservering (attractie, tijdslot) VALUES (%s, %s)"
