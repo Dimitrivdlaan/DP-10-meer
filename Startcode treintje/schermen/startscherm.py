@@ -28,9 +28,8 @@ class Startscherm(QWidget):
 
         # laatste knop (Lakeside Mania) gaat naar de volgende pagina
         layout.itemAt(layout.count() - 1).widget().clicked.connect(
-            lambda: self.main_window.toon_pagina(self.main_window.scherm1)
+            lambda: self.main_window.toon_pagina(self.main_window.get_scherm1())
         )
 
         # layout instellen voor het scherm
         self.setLayout(layout)
-

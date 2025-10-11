@@ -53,7 +53,12 @@ class MainWindow(QMainWindow):
         """Geeft gecontroleerde toegang tot de databaseverbinding."""
         return self._database
 
+    def get_scherm1(self):
+        """Geeft gecontroleerde toegang tot scherm1 vanuit andere schermen."""
+        return self._scherm1
+
     def closeEvent(self, event):
         """Wordt uitgevoerd bij het afsluiten van de applicatie."""
         self._database.sluit_verbinding()
         event.accept()
+

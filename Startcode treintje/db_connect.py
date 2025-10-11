@@ -43,19 +43,12 @@ class DatabaseConnectie:
             print(f"Fout bij ophalen van data: {err}")
 
     def voeg_reservering_toe(self, attractie, tijdslot):
-        """Voegt een reservering toe voor een attractie en tijdslot."""
-        try:
-            # Insert-query om een nieuwe reservering op te slaan
-            query = "INSERT INTO Reservering (attractie, tijdslot) VALUES (%s, %s)"
-            self._cursor.execute(query, (attractie, tijdslot))
-            self._conn.commit()
-            print(f"Reservering toegevoegd: {attractie} om {tijdslot}")
-        except mysql.connector.Error as err:
-            print(f"Fout bij toevoegen reservering: {err}")
-
-    def sluit_verbinding(self):
-        """Sluit de databaseverbinding af."""
-        if self._conn and self._conn.is_connected():
-            self._cursor.close()
-            self._conn.close()
-            print("Verbinding met database gesloten.")
+     """Voegt een reservering toe voor een attractie en tijdslot."""
+    try:
+        # Insert-query om een nieuwe reservering op te slaan
+        query = "INSERT INTO Reservering (attractie, tijdslot) VALUES (%s, %s)"
+        self._cursor.execute(query, (attractie, tijdslot))
+        self._conn.commit()
+        print(f"Reservering toegevoegd: {attractie} om {tijdslot}")
+    except mysql.connector.Error as err:
+        print(f"Fout bij toevoegen reservering: {err}")
