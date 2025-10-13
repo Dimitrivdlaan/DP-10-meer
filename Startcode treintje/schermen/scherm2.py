@@ -1,24 +1,31 @@
 # Opmerkingen in deze code zijn door mij geschreven ter verduidelijking van de werking.
-# Na het kiezen van een tijdslot kan de gebruiker zijn reis bevestigen.
+
+"""
+Na het kiezen van een tijdslot kan de gebruiker zijn reis bevestigen.
+"""
 
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QListWidget
 from PyQt6.QtCore import Qt
 
+
 class Scherm2(QWidget):
-    def __init__(self, main_window):
+    """Scherm waar de gebruiker een tijdslot kan kiezen en zijn reis kan bevestigen."""
+
+    def __init__(self, hoofd_venster):
+        """Initialiseert het scherm en maakt de interface aan."""
         super().__init__()
 
         # Verwijzing naar het hoofdvenster om later te kunnen wisselen van scherm
-        self._main_window = main_window
+        self._hoofd_venster = hoofd_venster
 
         # Layout voor dit scherm
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        _layout = QVBoxLayout()
+        _layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Titel bovenaan
-        titel = QLabel("Selecteer een beschikbaar tijdslot")
-        titel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        titel.setStyleSheet("font-size: 18px; font-weight: bold; margin-bottom: 10px;")
+        _titel = QLabel("Selecteer een beschikbaar tijdslot")
+        _titel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        _titel.setStyleSheet("font-size: 18px; font-weight: bold; margin-bottom: 10px;")
 
         # Lijst met beschikbare tijden
         self._lijst_tijden = QListWidget()
@@ -33,33 +40,32 @@ class Scherm2(QWidget):
         ])
 
         # Knop om tijdslot te bevestigen
-        self._btn_bevestig = QPushButton("Bevestig mijn reis")
-        self._btn_bevestig.setStyleSheet("background-color: lightgreen; height: 40px;")
-        self._btn_bevestig.clicked.connect(self._bevestig_reis)
+        self._knop_bevestig = QPushButton("Bevestig mijn reis")
+        self._knop_bevestig.setStyleSheet("background-color: lightgreen; height: 40px;")
+        self._knop_bevestig.clicked.connect(self._bevestig_reis)
 
         # Alles toevoegen aan de layout
-        layout.addWidget(titel)
-        layout.addWidget(self._lijst_tijden)
-        layout.addWidget(self._btn_bevestig)
+        _layout.addWidget(_titel)
+        _layout.addWidget(self._lijst_tijden)
+        _layout.addWidget(self._knop_bevestig)
 
         # Layout koppelen aan het scherm
-        self.setLayout(layout)
+        self.setLayout(_layout)
 
     def _bevestig_reis(self):
-        """Functie om de gekozen tijd op te halen en naar het bevestigingsscherm te gaan."""
+        """Haalt de gekozen tijd op, koppelt deze aan de attractie en gaat naar het bevestigingsscherm."""
         geselecteerde_items = self._lijst_tijden.selectedItems()
 
         if geselecteerde_items:
             tijd = geselecteerde_items[0].text()
 
-            # Haal de geselecteerde attractie op via de getterfunctie van MainWindow
-            attractie = self._main_window.get_geselecteerde_attractie() or "Onbekende attractie"
+            # Haal de geselecteerde attractie op via de getterfunctie van het hoofdvenster
+            attractie = self._hoofd_venster.get_geselecteerde_attractie() or "Onbekende attractie"
 
             print(f"Tijdslot bevestigd: {tijd} voor attractie: {attractie}")
 
             # Tijd en attractie doorgeven aan scherm 3
-            self._main_window._scherm3.stel_reservering_in(attractie, tijd)
-            self._main_window.toon_pagina(self._main_window._scherm3)
+            self._hoofd_venster._scherm3.stel_reservering_in(attractie, tijd)
+            self._hoofd_venster.toon_pagina(self._hoofd_venster._scherm3)
         else:
             print("Geen tijdslot geselecteerd!")
-

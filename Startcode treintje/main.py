@@ -1,29 +1,37 @@
-# Opmerkingen in deze code zijn door mij geschreven ter verduidelijking van de werking. 
-# Dit is het startpunt van de applicatie, hier wordt de hoofdwindow geopend en de stijl geladen.
+# Opmerkingen in deze code zijn door mij geschreven ter verduidelijking van de werking.
+
+"""
+Dit is het startpunt van de applicatie.
+Hier wordt het hoofdvenster geopend en de opmaakstijl (QSS-bestand) geladen.
+"""
 
 from PyQt6.QtWidgets import QApplication
-from schermen.main_window import MainWindow  # import aangepast voor juiste pad
+from schermen.main_window import HoofdVenster  # import aangepast voor juiste pad
+
 
 def main():
+    """Start de applicatie en opent het hoofdvenster."""
     app = QApplication([])
 
-    # stijl van het bestand style.qss laden
-    load_stylesheet(app)
+    # Stijl van het bestand style.qss laden
+    laad_opmaakstijl(app)
 
-    # hoofdvenster starten
-    window = MainWindow()
-    window.show()
+    # Hoofdvenster starten
+    venster = HoofdVenster()
+    venster.show()
 
-    # app uitvoeren
+    # Applicatie uitvoeren
     app.exec()
 
-def load_stylesheet(app):
-    """Laadt de QSS-stylesheet zodat de GUI mooi wordt weergegeven"""
+
+def laad_opmaakstijl(app):
+    """Laadt de QSS-stylesheet zodat de GUI mooi wordt weergegeven."""
     try:
-        with open("style.qss", "r") as f:
-            app.setStyleSheet(f.read())
+        with open("style.qss", "r") as bestand:
+            app.setStyleSheet(bestand.read())
     except FileNotFoundError:
         print("style.qss niet gevonden — standaardstijl wordt gebruikt.")
+
 
 if __name__ == "__main__":
     main()
