@@ -1,0 +1,137 @@
+# schermen/reserveringen_scherm.py
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLineEdit, QLabel, QMessageBox
+
+# Services uit je nieuwe module
+from modules.reserveringen.services import reservering_service
+from modules.reserveringen.dao import trein_dao
+
+class ReserveringenScherm(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("ReserveringenScherm")
+
+        # --- UI ---
+        main = QVBoxLayout(self)
+
+        top = QHBoxLayout()
+        top.addWidget(QLabel("QR ID:"))
+        self.qr_edit = QLineEdit()
+        self.qr_edit.setPlaceholderText("bijv. 101")
+        btn_zoek = QPushButton("Zoek")
+        btn_zoek.clicked.connect(self._zoek)
+        top.addWidget(self.qr_edit)
+        top.addWidget(btn_zoek)
+        main.addLayout(top)
+
+        # linkertabel: reserveringen
+        self.tbl_res = QTableWidget(0, 4)
+        self.tbl_res.setHorizontalHeaderLabels(["Trein", "Van", "Naar", "Type"])
+        self.tbl_res.horizontalHeader().setStretchLastSection(True)
+        main.addWidget(QLabel("Reserveringen"))
+        main.addWidget(self.tbl_res)
+
+        btn_cancel = QPushButton("Annuleren")
+        btn_cancel.clicked.connect(self._annuleer)
+        main.addWidget(btn_cancel)
+
+        # rechtertabel: treinen
+        self.tbl_tr = QTableWidget(0, 4)
+        self.tbl_tr.setHorizontalHeaderLabels(["Trein ID", "Van", "Naar", "Cap"])
+        self.tbl_tr.horizontalHeader().setStretchLastSection(True)
+        main.addWidget(QLabel("Treinen"))
+        main.addWidget(self.tbl_tr)
+
+        type_row = QHBoxLayout()
+        type_row.addWidget(QLabel("Type behoefte:"))
+        self.type_edit = QLineEdit()
+        self.type_edit.setPlaceholderText("bijv. rolstoel")
+        type_row.addWidget(self.type_edit)
+        btn_confirm = QPushButton("Bevestigen")
+        btn_confirm.clicked.connect(self._bevestig)
+        type_row.addWidget(btn_confirm)
+        main.addLayout(type_row)
+
+        # cache treinen
+        self._laad_treinen()
+
+    # -------- helper UI ----------
+    def _set_table(self, table, rows, headers):
+        table.clearContents()
+        table.setRowCount(len(rows))
+        for r, row in enumerate(rows):
+            for c, val in enumerate(headers):
+                table.setItem(r, c, QTableWidgetItem(str(row.get(val, ""))))
+
+    def _selected_row(self, table):
+        idxs = table.selectionModel().selectedRows()
+        if not idxs:
+            return None
+        return idxs[0].row()
+
+    # -------- data laad ----------
+    def _laad_treinen(self):
+        treinen = trein_dao.list_treinen()
+        rows = []
+        for t in treinen:
+            rows.append({
+                "id": t.trein_id,
+                "van": t.vertrek_naam,
+                "naar": t.aankomst_naam,
+                "cap": t.max_capaciteit,
+            })
+        self._set_table(self.tbl_tr, rows, ["id", "van", "naar", "cap"])
+
+    def _zoek(self):
+        try:
+            qr_id = int(self.qr_edit.text().strip())
+        except ValueError:
+            QMessageBox.warning(self, "Input", "Voer een geldige QR ID (getal) in.")
+            return
+        items = reservering_service.list_reservations(qr_id)
+        rows = []
+        for it in items:
+            rows.append({
+                "trein": it.trein_id,
+                "van": it.trein_vertrek,
+                "naar": it.trein_aankomst,
+                "type": it.type_behoefte,
+            })
+        self._set_table(self.tbl_res, rows, ["trein", "van", "naar", "type"])
+
+    def _bevestig(self):
+        try:
+            qr_id = int(self.qr_edit.text().strip())
+        except ValueError:
+            QMessageBox.warning(self, "Input", "Voer eerst een geldige QR ID in.")
+            return
+        row = self._selected_row(self.tbl_tr)
+        if row is None:
+            QMessageBox.warning(self, "Selectie", "Selecteer eerst een trein in de lijst Treinen.")
+            return
+        trein_id = int(self.tbl_tr.item(row, 0).text())
+        type_behoefte = self.type_edit.text().strip() or "rolstoel"
+        try:
+            reservering_service.confirm_reservation(qr_id, trein_id, type_behoefte)
+            QMessageBox.information(self, "OK", "Reservering bevestigd (toegevoegd).")
+            self._zoek()
+        except Exception as e:
+            QMessageBox.critical(self, "Fout", f"Bevestigen mislukt: {e}")
+
+    def _annuleer(self):
+        try:
+            qr_id = int(self.qr_edit.text().strip())
+        except ValueError:
+            QMessageBox.warning(self, "Input", "Voer eerst een geldige QR ID in.")
+            return
+        row = self._selected_row(self.tbl_res)
+        if row is None:
+            QMessageBox.warning(self, "Selectie", "Selecteer eerst een reservering links.")
+            return
+        trein_id = int(self.tbl_res.item(row, 0).text())
+        try:
+            reservering_service.cancel_reservation(qr_id, trein_id)
+            QMessageBox.information(self, "OK", "Reservering geannuleerd (verwijderd).")
+            self._zoek()
+        except Exception as e:
+            QMessageBox.critical(self, "Fout", f"Annuleren mislukt: {e}")
