@@ -28,20 +28,20 @@ class Scherm1(QWidget):
         self.setLayout(layout)
 
     def load_locations(self):
-        self.mycursor.execute("SELECT locatie_id, naam FROM locatie")
+        self.mycursor.execute("SELECT locatie_id, naam, wachttijd FROM locatie")
         locations = self.mycursor.fetchall()
         self.location_combo.clear()
-        self.location_data = {loc_id: name for loc_id, name in locations}
-        for loc_id, name in locations:
-            self.location_combo.addItem(name, loc_id)
+        self.location_data = {loc_id: (name, wachttijd) for loc_id, name, wachttijd in locations}
+        for loc_id, name, wachttijd in locations:
+            self.location_combo.addItem(f"{name} ({wachttijd})", loc_id)
 
     def load_travel_plan(self):
         self.mycursor.execute("SELECT locatie_id FROM reisplan WHERE qr_id = %s", (self.qr_id,))
         plan = self.mycursor.fetchall()
         self.travel_plan_list.clear()
         for (loc_id,) in plan:
-            name = self.location_data.get(loc_id, f"Locatie {loc_id}")
-            self.travel_plan_list.addItem(name)
+            name, wachttijd = self.location_data.get(loc_id, (f"Locatie {loc_id}", ""))
+            self.travel_plan_list.addItem(f"{name} ({wachttijd})")
 
     def add_to_travel_plan(self):
         selected_index = self.location_combo.currentIndex()
