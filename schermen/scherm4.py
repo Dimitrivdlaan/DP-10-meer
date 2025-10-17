@@ -9,6 +9,7 @@ class Scherm4(QWidget):
         layout.addWidget(QLabel("Dit is scherm 4"))
 
         btn_naar_scherm_1 = QPushButton("Naar scherm 1")
+        btn_naar_scherm_1.setObjectName("nav-button")
         btn_naar_scherm_1.clicked.connect(self.open_scherm)
         layout.addWidget(btn_naar_scherm_1)
 

@@ -10,6 +10,7 @@ class Scherm3(QWidget):
 
         # TODO: ervoor zorgen dat als je op een product klikt je naar het juiste product gaat
         btn_naar_scherm_4 = QPushButton("Naar scherm 4")
+        btn_naar_scherm_4.setObjectName("nav-button")
         btn_naar_scherm_4.clicked.connect(self.open_scherm)
         layout.addWidget(btn_naar_scherm_4)
 

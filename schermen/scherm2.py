@@ -11,6 +11,7 @@ class Scherm2(QWidget):
         # TODO: wellicht kunnen jullie vanuit meerdere pagina's de winkelmand openen. 
         # Gedeelde functionaliteit hoe los je dat met OOP op?
         btn_naar_scherm3 = QPushButton("Naar scherm 3")
+        btn_naar_scherm3.setObjectName("nav-button")
         btn_naar_scherm3.clicked.connect(self.open_scherm)
         layout.addWidget(btn_naar_scherm3)
 

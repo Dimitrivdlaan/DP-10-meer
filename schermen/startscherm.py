@@ -9,6 +9,7 @@ class Startscherm(QWidget):
         layout.addWidget(QLabel("Welkom bij Lake Side Mania!"))
 
         btn_start = QPushButton("Tik om te starten!")
+        btn_start.setObjectName("nav-button")
         btn_start.clicked.connect(self.naar_volgende_scherm)
         layout.addWidget(btn_start)
 
