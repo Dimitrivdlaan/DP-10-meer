@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QComboBox, QScrollArea, QHBoxLayout
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QComboBox, QScrollArea, QHBoxLayout, QListWidget
 import mysql.connector
 
 class Scherm1(QWidget):
@@ -31,6 +31,12 @@ class Scherm1(QWidget):
         add_button.clicked.connect(self.add_to_travel_plan)
         layout.addWidget(add_button)
 
+        # Uitgecheckte locaties sectie
+        layout.addWidget(QLabel("Uitgecheckte Locaties:"))
+        self.checked_out_list = QListWidget()
+        layout.addWidget(self.checked_out_list)
+        self.load_checked_out_locations()
+
         nav_layout = QHBoxLayout()
         btn_terug_naar_scherm4 = QPushButton("Terug naar Scherm 4")
         btn_terug_naar_scherm4.setObjectName("nav-button")
@@ -41,7 +47,7 @@ class Scherm1(QWidget):
         btn_naar_start.setObjectName("nav-button")
         btn_naar_start.clicked.connect(lambda: self.main_window.toon_pagina(self.main_window.startscherm))
         nav_layout.addWidget(btn_naar_start)
-
+        
         layout.addLayout(nav_layout)
         self.setLayout(layout)
 
@@ -98,3 +104,17 @@ class Scherm1(QWidget):
                 self.mydb.commit()
                 name, wachttijd = self.location_data[loc_id]
                 self.add_attraction_widget(loc_id, name, wachttijd)
+
+    def load_checked_out_locations(self):
+        self.mycursor.execute("""
+            SELECT r.locatie_id, l.naam, r.uitcheck_tijd 
+            FROM Reis r 
+            JOIN Locatie l ON r.locatie_id = l.locatie_id 
+            WHERE r.qr_id = %s AND r.uitcheck_tijd IS NOT NULL 
+            ORDER BY r.uitcheck_tijd DESC
+        """, (self.qr_id,))
+        checked_out = self.mycursor.fetchall()
+        
+        self.checked_out_list.clear()
+        for (locatie_id, naam, uitcheck_tijd) in checked_out:
+            self.checked_out_list.addItem(f"{naam} - Uitgecheckt op: {uitcheck_tijd}")

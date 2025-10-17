@@ -4,6 +4,7 @@ from .scherm3 import Scherm3
 from .scherm2 import Scherm2
 from .scherm4 import Scherm4
 from .scherm1 import Scherm1
+from .scherm5 import Scherm5
 
 
 class MainWindow(QMainWindow):
@@ -20,7 +21,8 @@ class MainWindow(QMainWindow):
         self.scherm1 = Scherm1(self)
         self.scherm2 = Scherm2(self)
         self.scherm3 = Scherm3(self)  
-        self.scherm4 = Scherm4(self)  
+        self.scherm4 = Scherm4(self)
+        self.scherm5 = None  # Wordt later geïnstantieerd met qr_id
        
         # Voeg toe aan stack
         self.stack.addWidget(self.startscherm)
